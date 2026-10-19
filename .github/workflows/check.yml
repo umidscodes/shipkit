@@ -1,0 +1,36 @@
+name: check
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v7
+      - run: sh scripts/check.sh
+  windows-install:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install into a temp home and uninstall again
+        shell: powershell
+        run: |
+          $p = Join-Path $env:RUNNER_TEMP "home"
+          ./install.ps1 -Prefix $p
+          foreach ($r in Get-ChildItem roles -Directory) {
+            foreach ($f in "$p\.claude\agents\$($r.Name).md", "$p\.omp\agent\agents\$($r.Name).md") {
+              if (-not (Test-Path $f)) { throw "missing $f" }
+              $first = [IO.File]::ReadAllBytes($f)[0..2]
+              if ($first[0] -eq 0xEF) { throw "$f has a BOM" }
+            }
+          }
+          ./install.ps1 -Prefix $p -Uninstall
+          if (Get-ChildItem $p -Recurse -File) { throw "uninstall left files" }

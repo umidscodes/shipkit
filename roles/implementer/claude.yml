@@ -1,0 +1,4 @@
+name: implementer
+description: Implementer. Use to deliver exactly one ready GitHub ticket as one small PR - tests first (named after scenario IDs), verify commands with real output, never weakens tests, never merges. Safe to run several in parallel in isolated worktrees.
+tools: Read, Grep, Glob, Edit, Write, Bash
+model: inherit

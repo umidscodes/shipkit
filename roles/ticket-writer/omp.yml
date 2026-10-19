@@ -1,0 +1,5 @@
+name: ticket-writer
+description: "Ticket Writer: splits an approved spec change into small, independently shippable GitHub issues with acceptance criteria, risk/size labels and dependency waves. Never writes code."
+tools: read, find, grep, glob, bash
+model: "@slow, @default"
+blocking: true

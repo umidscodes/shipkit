@@ -1,0 +1,4 @@
+name: ticket-writer
+description: Ticket Writer. Use after a spec change is approved to split it into small, independently shippable GitHub issues with acceptance criteria, risk/size labels and a dependency plan (waves). Never writes code.
+tools: Read, Grep, Glob, Bash
+model: inherit
