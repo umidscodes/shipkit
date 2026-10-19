@@ -1,10 +1,10 @@
 ---
-name: release
+name: ship-release
 description: Ship a version - cut a release candidate tag, verify the published artifacts, update TESTPLAN.md with cases for the new scenarios, get the user's manual sign-off (gate 4), then tag the final version. Use when a feature or set of fixes is merged and ready to release.
 argument-hint: <version, e.g. v0.2.0>
 ---
 
-# /release <version> — rc → verify → test plan → sign-off → tag
+# /ship-release <version> — rc → verify → test plan → sign-off → tag
 
 The project's release mechanics (tag-triggered workflow, artifact names, install
 steps) live in its `README.md` / `AGENTS.md`. Read them first; this skill is the

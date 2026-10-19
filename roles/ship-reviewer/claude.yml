@@ -1,4 +1,4 @@
-name: reviewer
+name: ship-reviewer
 description: Reviewer/QA. Use to review one pull request against its ticket and the spec - reruns checks, verifies scenario-ID traceability and test honesty, does a mutation check, and posts an APPROVE / REQUEST_CHANGES verdict. Never fixes or merges.
 tools: Read, Grep, Glob, Bash
 model: inherit

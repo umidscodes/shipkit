@@ -34,3 +34,14 @@ jobs:
           }
           ./install.ps1 -Prefix $p -Uninstall
           if (Get-ChildItem $p -Recurse -File) { throw "uninstall left files" }
+      - name: Never overwrite or remove foreign skills and agents
+        shell: powershell
+        run: |
+          $p = Join-Path $env:RUNNER_TEMP "home2"
+          New-Item -ItemType Directory -Force "$p\.omp\agent\skills\ship-spec", "$p\.claude\agents" | Out-Null
+          Set-Content "$p\.omp\agent\skills\ship-spec\SKILL.md" "mine"
+          Set-Content "$p\.claude\agents\ship-reviewer.md" "mine"
+          ./install.ps1 -Prefix $p
+          ./install.ps1 -Prefix $p -Uninstall
+          if ((Get-Content "$p\.omp\agent\skills\ship-spec\SKILL.md") -ne "mine") { throw "foreign skill touched" }
+          if ((Get-Content "$p\.claude\agents\ship-reviewer.md") -ne "mine") { throw "foreign agent touched" }

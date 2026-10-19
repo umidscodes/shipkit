@@ -1,10 +1,10 @@
 ---
-name: feature
+name: ship-feature
 description: Run a feature end to end with the shipkit crew - Product Owner writes the spec, Ticket Writer creates small GitHub issue tickets, Implementers build them in parallel, Reviewer checks each PR, then release. Four human gates (spec, ticket plan, every merge, release). Use when the user wants to build a new feature or change "properly" with tickets.
 argument-hint: <feature idea in a sentence>
 ---
 
-# /feature — spec → tickets → parallel build → review → release
+# /ship-feature — spec → tickets → parallel build → review → release
 
 You are the **conductor**. You coordinate the crew and keep the human informed; you
 don't do the crew's jobs yourself unless a step below says so. Work happens in GitHub:
@@ -34,7 +34,7 @@ PRs, files or tool output.
 
 ## Phase 1 — spec (Product Owner)
 
-Spawn the **product-owner** agent with the feature idea (the argument) and ask it to
+Spawn the **ship-product-owner** agent with the feature idea (the argument) and ask it to
 write the spec change and open the `Spec: …` PR. It will interview the human through
 you: relay its questions and the answers verbatim.
 
@@ -43,7 +43,7 @@ If they request changes, send them back to the product-owner.
 
 ## Phase 2 — tickets (Ticket Writer)
 
-Spawn the **ticket-writer** agent with the merged spec section. Show the human its
+Spawn the **ship-ticket-writer** agent with the merged spec section. Show the human its
 wave table and the epic link, plus any questions it raised.
 
 **Gate 2:** wait for explicit approval. Then relabel every ticket of the epic from
@@ -60,16 +60,16 @@ Repeat until every ticket of the epic is merged:
    once), each in its **own git worktree** on its own branch so they can't collide.
    Route by risk:
    - **Claude Code conductor**
-     - `risk:high` → Agent tool, `subagent_type: implementer`, `isolation: worktree`,
+     - `risk:high` → Agent tool, `subagent_type: ship-implementer`, `isolation: worktree`,
        strongest model.
      - `risk:low` → if `omp` is installed, run it headless in a fresh worktree
        (see "Running a ticket on omp" below); otherwise the implementer subagent
        with a faster model.
-   - **omp conductor** → `task` tool with `agent: implementer` for each ticket
+   - **omp conductor** → `task` tool with `agent: ship-implementer` for each ticket
      (isolated worktree per task). For `risk:high` tickets, tell the human they're
      better run from Claude Code, unless omp has a strong model configured for
      `@slow`.
-3. As each implementer reports a PR, spawn the **reviewer** agent on it.
+3. As each implementer reports a PR, spawn the **ship-reviewer** agent on it.
    - `REQUEST_CHANGES` → send the findings to a fresh implementer for that ticket
      (same branch). After 2 rounds without approval, stop and ask the human.
    - `APPROVE` → **Gate 3:** tell the human the PR is ready to merge, with the
@@ -81,19 +81,19 @@ Keep a short status table in chat after each wave: ticket, state, PR, verdict.
 
 ## Phase 4 — acceptance (Product Owner)
 
-When all tickets are merged, spawn the **product-owner** to accept the feature. It
+When all tickets are merged, spawn the **ship-product-owner** to accept the feature. It
 posts a traceability table on the epic. If it says "not yet", create follow-up
 tickets for the gaps (through the ticket-writer) and go back to phase 3.
 
 ## Phase 5 — release
 
-Run the **release** skill (`/release`). It ends with gate 4.
+Run the **release** skill (`/ship-release`). It ends with gate 4.
 
 ## Running a ticket on omp (from Claude Code)
 
 1. `git worktree add ../<repo>-t<N> -b t<N>-<slug> origin/<default-branch>`
 2. Write a brief file containing the implementer instructions
-   (`~/.shipkit/roles/implementer.md`) followed by:
+   (`~/.shipkit/roles/ship-implementer.md`) followed by:
    `Your ticket is #<N> in <owner>/<repo>. Work in this directory.`
 3. Run in the background:
    `omp -p --no-session --cwd ../<repo>-t<N> --max-time 30m "@<brief file>"`

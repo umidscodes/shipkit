@@ -1,4 +1,4 @@
-name: reviewer
+name: ship-reviewer
 description: "Reviewer/QA: reviews one PR against its ticket and the spec - reruns checks, verifies scenario-ID traceability and test honesty, does a mutation check, posts APPROVE / REQUEST_CHANGES. Never fixes or merges."
 tools: read, find, grep, glob, bash, lsp
 model: "@slow, @default"

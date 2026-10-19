@@ -30,7 +30,7 @@ for s in "$ROOT"/skills/*/; do
 done
 
 # Every agent a skill mentions must exist.
-for a in $(grep -ohE '\*\*(product-owner|ticket-writer|implementer|reviewer)\*\*' "$ROOT"/skills/*/SKILL.md | tr -d '*' | sort -u); do
+for a in $(grep -ohE '\*\*(ship-product-owner|ship-ticket-writer|ship-implementer|ship-reviewer)\*\*' "$ROOT"/skills/*/SKILL.md | tr -d '*' | sort -u); do
 	[ -d "$ROOT/roles/$a" ] || err "skills mention agent '$a' but roles/$a doesn't exist"
 done
 
@@ -50,6 +50,22 @@ for s in "$ROOT"/skills/*/; do
 done
 PREFIX="$TMP" sh "$ROOT/install.sh" --uninstall >/dev/null
 [ -z "$(find "$TMP" -type f)" ] || err "uninstall left files: $(find "$TMP" -type f | head -3)"
+rm -rf "$TMP"
+
+# Never touch someone else's skill or agent with the same name.
+TMP=$(mktemp -d)
+first_skill=$(basename "$(ls -d "$ROOT"/skills/*/ | head -1)")
+first_role=$(basename "$(ls -d "$ROOT"/roles/*/ | head -1)")
+mkdir -p "$TMP/.omp/agent/skills/$first_skill" "$TMP/.claude/agents"
+echo "user's own skill" >"$TMP/.omp/agent/skills/$first_skill/SKILL.md"
+echo "user's own agent" >"$TMP/.claude/agents/$first_role.md"
+out=$(PREFIX="$TMP" sh "$ROOT/install.sh")
+echo "$out" | grep -q "SKIP" || err "install didn't report skipping foreign files"
+[ "$(cat "$TMP/.omp/agent/skills/$first_skill/SKILL.md")" = "user's own skill" ] || err "install overwrote a foreign skill"
+[ "$(cat "$TMP/.claude/agents/$first_role.md")" = "user's own agent" ] || err "install overwrote a foreign agent"
+PREFIX="$TMP" sh "$ROOT/install.sh" --uninstall >/dev/null
+[ -f "$TMP/.omp/agent/skills/$first_skill/SKILL.md" ] || err "uninstall removed a foreign skill"
+[ -f "$TMP/.claude/agents/$first_role.md" ] || err "uninstall removed a foreign agent"
 rm -rf "$TMP"
 
 [ $fail = 0 ] && echo "shipkit check: OK"

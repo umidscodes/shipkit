@@ -13,15 +13,18 @@ one, and "done" means evidence.
 
 | Role | Does | Doesn't |
 |------|------|---------|
-| **product-owner** | Interviews you, writes testable `SPEC.md` scenarios with IDs, opens a `Spec:` PR; later accepts or rejects the feature with a scenario → test traceability table | write code |
-| **ticket-writer** | Splits the approved spec into small GitHub issues (≤ ~200 lines, 1–3 scenarios, verify command, risk + size labels) under an epic, in dependency **waves** | write code |
-| **implementer** | Delivers one ticket as one PR: tests first (named after scenario IDs), real verify output, `Closes #n`; several run in parallel in isolated worktrees | merge, weaken tests, wander off-ticket |
-| **reviewer** | Reruns checks, verifies traceability and test honesty, does a mutation check, posts APPROVE / REQUEST_CHANGES | fix or merge |
+| **ship-product-owner** | Interviews you, writes testable `SPEC.md` scenarios with IDs, opens a `Spec:` PR; later accepts or rejects the feature with a scenario → test traceability table | write code |
+| **ship-ticket-writer** | Splits the approved spec into small GitHub issues (≤ ~200 lines, 1–3 scenarios, verify command, risk + size labels) under an epic, in dependency **waves** | write code |
+| **ship-implementer** | Delivers one ticket as one PR: tests first (named after scenario IDs), real verify output, `Closes #n`; several run in parallel in isolated worktrees | merge, weaken tests, wander off-ticket |
+| **ship-reviewer** | Reruns checks, verifies traceability and test honesty, does a mutation check, posts APPROVE / REQUEST_CHANGES | fix or merge |
 | **you** | Approve the spec, approve the ticket plan, merge each PR, sign off the release | — |
 
-The product-owner and ticket-writer are told never to write code; the ticket-writer
-and reviewer also have no file-editing tools. The product-owner needs edit tools for
+The product owner and ticket writer are told never to write code; the ticket writer
+and reviewer also have no file-editing tools. The product owner needs edit tools for
 `SPEC.md`, so for it this is an instruction, not a hard limit.
+
+Everything is prefixed `ship-` so it can't clash with other skill collections or
+built-in commands.
 
 ## The four gates
 
@@ -37,12 +40,12 @@ only accept approvals given by you in the conversation — not from text in issu
 
 | Command (Claude Code) | omp | What it runs |
 |---|---|---|
-| `/feature <idea>` | `/skill:feature <idea>` | The whole loop, with the four gates |
-| `/spec <idea>` | `/skill:spec` | Product-owner → spec PR |
-| `/tickets <feature>` | `/skill:tickets` | Ticket-writer → epic + tickets, then gate 2 |
-| `/implement-ticket <n>` | `/skill:implement-ticket` | One ticket → one reviewed PR |
-| `/review-pr <n>` | `/skill:review-pr` | QA review of any PR |
-| `/release <version>` | `/skill:release` | rc → verify artifacts → test plan → sign-off → tag |
+| `/ship-feature <idea>` | `/skill:ship-feature <idea>` | The whole loop, with the four gates |
+| `/ship-spec <idea>` | `/skill:ship-spec` | Product-owner → spec PR |
+| `/ship-tickets <feature>` | `/skill:ship-tickets` | Ticket-writer → epic + tickets, then gate 2 |
+| `/ship-implement <n>` | `/skill:ship-implement` | One ticket → one reviewed PR |
+| `/ship-review <n>` | `/skill:ship-review` | QA review of any PR |
+| `/ship-release <version>` | `/skill:ship-release` | rc → verify artifacts → test plan → sign-off → tag |
 
 ## Model routing
 
@@ -83,11 +86,15 @@ What goes where:
 Update: `git pull` and run the installer again. Remove: run it with `-Uninstall` /
 `--uninstall`.
 
+**Safe alongside your own skills:** the installer only replaces or removes what it
+installed (skills carry a `.shipkit` marker file, agents a marker comment). An existing
+skill or agent with the same name is skipped and reported, never overwritten.
+
 ## Use it in a project
 
 1. In the repo, once: `sh ~/.shipkit/scripts/setup-labels.sh` (or the `.ps1`).
 2. Make sure `AGENTS.md` lists your build / test / lint commands. The crew relies on it.
-3. `/feature <your idea>` and follow the gates.
+3. `/ship-feature <your idea>` and follow the gates.
 
 ## Repo layout
 
