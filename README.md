@@ -107,6 +107,11 @@ scripts/                   labels setup, CI checks
 install.ps1 / install.sh   generate agents for both tools and install everything
 ```
 
+## Contributing
+
+New skills and roles are welcome: see [CONTRIBUTING.md](CONTRIBUTING.md). Have an idea
+but not the time? Open an issue with the "Skill or role idea" template.
+
 ## Lessons baked in (from shipping Kopi)
 
 - Local models sometimes report success they didn't achieve: the conductor verifies
