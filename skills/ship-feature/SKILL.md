@@ -60,8 +60,8 @@ Repeat until every ticket of the epic is merged:
    once), each in its **own git worktree** on its own branch so they can't collide.
    Route by risk:
    - **Claude Code conductor**
-     - `risk:high` → Agent tool, `subagent_type: ship-implementer`, `isolation: worktree`,
-       strongest model.
+     - `risk:high` → Agent tool, `subagent_type: ship-implementer`, `isolation: worktree`
+       (Claude Code manages that worktree itself), strongest model.
      - `risk:low` → if `omp` is installed, run it headless in a fresh worktree
        (see "Running a ticket on omp" below); otherwise the implementer subagent
        with a faster model.
@@ -91,13 +91,22 @@ Run the **release** skill (`/ship-release`). It ends with gate 4.
 
 ## Running a ticket on omp (from Claude Code)
 
-1. `git worktree add ../<repo>-t<N> -b t<N>-<slug> origin/<default-branch>`
-2. Write a brief file containing the implementer instructions
+Keep every worktree **inside the repo**, under `.worktrees/`. Agent shells are often
+sandboxed to the project folder: a worktree next to the repo (`../repo-t12`) can end
+up in a private overlay where the human never sees the files.
+
+1. Once per repo, keep `.worktrees/` out of git without touching the project's
+   `.gitignore`: add a line `.worktrees/` to `.git/info/exclude` if it isn't there.
+2. `git fetch origin` then
+   `git worktree add .worktrees/t<N> -b t<N>-<slug> origin/<default-branch>`
+3. Write a brief file **next to** the worktree, not in it, so it can't be committed:
+   `.worktrees/t<N>.brief.md`, containing the implementer instructions
    (`~/.shipkit/roles/ship-implementer.md`) followed by:
    `Your ticket is #<N> in <owner>/<repo>. Work in this directory.`
-3. Run in the background:
-   `omp -p --no-session --cwd ../<repo>-t<N> --max-time 30m "@<brief file>"`
+4. Run in the background, from the repo root:
+   `omp -p --no-session --cwd .worktrees/t<N> --max-time 30m "@.worktrees/t<N>.brief.md"`
    Pass the prompt as an `@file`, never inline: some shells mangle quotes.
-4. When it finishes, check the PR exists and the checks actually pass before calling
+5. When it finishes, check the PR exists and the checks actually pass before calling
    the reviewer. Local models sometimes report success they didn't achieve.
-5. Remove the worktree after the PR is merged.
+6. After the PR is merged: `git worktree remove .worktrees/t<N>` and delete the
+   brief file.

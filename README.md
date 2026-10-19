@@ -121,6 +121,8 @@ but not the time? Open an issue with the "Skill or role idea" template.
 - Local models sometimes report success they didn't achieve: the conductor verifies
   PRs and checks itself before calling them done.
 - Pass long prompts to CLIs as `@file`; shells can mangle quotes.
+- Keep worktrees inside the repo (`.worktrees/`, excluded via `.git/info/exclude`):
+  sandboxed agent shells may not really write outside the project folder.
 - A green release workflow isn't proof: download and verify the artifacts.
 - Verify the observer: if what an agent sees disagrees with what the human sees,
   trust the human's direct view and find out why.
