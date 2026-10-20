@@ -8,7 +8,7 @@ argument-hint: <issue number>
 
 1. `gh issue view <n>`: it must be labelled `ticket` and `status:ready`, and every
    issue in its "Depends on" must be closed. Otherwise stop and say why.
-2. Pick who implements by its risk label (same routing as `/ship-feature` phase 3):
+2. Pick who implements by its risk label (same routing as `/ship-feature` phase 4):
    `risk:high` → the **ship-implementer** agent on the strongest model, isolated worktree;
    `risk:low` → omp headless if available, else the implementer agent.
 3. When the implementer reports, verify it yourself: the PR exists, it says

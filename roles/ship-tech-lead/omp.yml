@@ -1,0 +1,5 @@
+name: ship-tech-lead
+description: "Tech Lead: designs how an approved spec change fits the code before tickets are written - caller-first interfaces, alternatives, invariants, test strategy and fake contracts, non-colliding work units - as a design/<feature>.md PR. Never writes production code."
+tools: read, find, grep, glob, edit, write, bash, lsp
+model: "@slow, @default"
+blocking: true

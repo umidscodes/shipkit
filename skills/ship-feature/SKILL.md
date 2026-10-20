@@ -1,10 +1,10 @@
 ---
 name: ship-feature
-description: Run a feature end to end with the shipkit crew - Product Owner writes the spec, Ticket Writer creates small GitHub issue tickets, Implementers build them in parallel, Reviewer checks each PR, then release. Four human gates (spec, ticket plan, every merge, release). Use when the user wants to build a new feature or change "properly" with tickets.
+description: Run a feature end to end with the shipkit crew - Product Owner writes the spec, Tech Lead designs how it fits the code, Ticket Writer creates small GitHub issue tickets, Implementers build them in parallel, Reviewer checks each PR, then release. Four human gates (spec, design + ticket plan, every merge, release). Use when the user wants to build a new feature or change "properly" with tickets.
 argument-hint: <feature idea in a sentence>
 ---
 
-# /ship-feature — spec → tickets → parallel build → review → release
+# /ship-feature — spec → design → tickets → parallel build → review → release
 
 You are the **conductor**. You coordinate the crew and keep the human informed; you
 don't do the crew's jobs yourself unless a step below says so. Work happens in GitHub:
@@ -15,7 +15,7 @@ spec PRs, issues as tickets, PRs per ticket.
 | Gate | The human does | You wait for |
 |------|----------------|--------------|
 | 1. Spec | merges the `Spec: …` PR | the PR shows as merged |
-| 2. Ticket plan | says the plan is approved in chat | an explicit "approved" |
+| 2. Design + ticket plan | merges the `Design: …` PR and says the plan is approved in chat | the PR shows as merged, and an explicit "approved" |
 | 3. Each merge | merges each ticket PR | the PR shows as merged |
 | 4. Release | signs off the test plan | an explicit sign-off |
 
@@ -41,16 +41,25 @@ you: relay its questions and the answers verbatim.
 **Gate 1:** show the PR link and the scenario IDs. Wait until the human merges it.
 If they request changes, send them back to the product-owner.
 
-## Phase 2 — tickets (Ticket Writer)
+## Phase 2 — design (Tech Lead)
 
-Spawn the **ship-ticket-writer** agent with the merged spec section. Show the human its
-wave table and the epic link, plus any questions it raised.
+Spawn the **ship-tech-lead** agent with the merged spec section. It opens a
+`Design: …` PR with the chosen shape, invariants, test strategy and work units. Show
+the human the PR link and a short summary, and relay any open questions. Don't wait
+for the merge yet: the design is approved together with the tickets at gate 2.
 
-**Gate 2:** wait for explicit approval. Then relabel every ticket of the epic from
-`status:proposed` to `status:ready`. If the human wants changes, have the
+## Phase 3 — tickets (Ticket Writer)
+
+Spawn the **ship-ticket-writer** agent with the merged spec section and the design PR.
+Show the human its wave table and the epic link, plus any questions it raised.
+
+**Gate 2:** wait until the human has merged the design PR **and** explicitly approved
+the plan. Then relabel every ticket of the epic from `status:proposed` to
+`status:ready`. If the human wants design changes, send them to the tech lead, then
+have the ticket-writer update the affected tickets. For ticket-only changes, have the
 ticket-writer edit the issues and show the table again.
 
-## Phase 3 — build (Implementers, in parallel)
+## Phase 4 — build (Implementers, in parallel)
 
 Repeat until every ticket of the epic is merged:
 
@@ -72,6 +81,9 @@ Repeat until every ticket of the epic is merged:
 3. As each implementer reports a PR, spawn the **ship-reviewer** agent on it.
    - `REQUEST_CHANGES` → send the findings to a fresh implementer for that ticket
      (same branch). After 2 rounds without approval, stop and ask the human.
+   - Design findings count as much as test findings. If the reviewer finds the
+     design itself is wrong (not just the PR), stop and bring it to the human: fix
+     the design doc first, then the affected tickets.
    - `APPROVE` → **Gate 3:** tell the human the PR is ready to merge, with the
      reviewer's summary. Wait for them to merge. Then tick the ticket in the epic.
 4. A ticket labelled `status:blocked` → show its comment to the human and ask how to
@@ -79,13 +91,13 @@ Repeat until every ticket of the epic is merged:
 
 Keep a short status table in chat after each wave: ticket, state, PR, verdict.
 
-## Phase 4 — acceptance (Product Owner)
+## Phase 5 — acceptance (Product Owner)
 
 When all tickets are merged, spawn the **ship-product-owner** to accept the feature. It
 posts a traceability table on the epic. If it says "not yet", create follow-up
-tickets for the gaps (through the ticket-writer) and go back to phase 3.
+tickets for the gaps (through the ticket-writer) and go back to phase 4.
 
-## Phase 5 — release
+## Phase 6 — release
 
 Run the **release** skill (`/ship-release`). It ends with gate 4.
 
