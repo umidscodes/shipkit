@@ -13,4 +13,4 @@ answers back, verbatim.
 When it reports, show the user the PR link and the new scenario IDs, and remind them
 that **merging the PR is the approval** (gate 1). Don't merge it yourself.
 
-Next step after the merge: `/ship-tickets <feature>`.
+Next step after the merge: `/ship-design <feature>`.

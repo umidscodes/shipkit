@@ -1,27 +1,32 @@
 # shipkit
 
 A small crew of AI agents and a playbook for shipping features **properly**: spec →
-small tickets → parallel implementation → QA review → release, with a human approving
-every step that matters. Works in **Claude Code** and **omp** (oh-my-pi), and lets you
-hand low-risk tickets to a local model while the strong model takes the risky ones.
+design → small tickets → parallel implementation → review → release, with a human
+approving every step that matters. Works in **Claude Code** and **omp** (oh-my-pi), and
+lets you hand low-risk tickets to a local model while the strong model takes the risky
+ones.
 
-Born from building [Kopi](https://github.com/umidscodes/kopi) with agents, and written
+Born from building [Kopi](https://github.com/umidscodes/kopi) with agents. It started
 from a QA engineer's point of view: every scenario has an ID, every test traces to
-one, and "done" means evidence.
+one, and "done" means evidence. The developer side is just as explicit: the design is
+agreed before tickets are cut, invariants are written down, and every PR is reviewed
+for code design as well as for tests.
 
 ## The crew
 
 | Role | Does | Doesn't |
 |------|------|---------|
 | **ship-product-owner** | Interviews you, writes testable `SPEC.md` scenarios with IDs, opens a `Spec:` PR; later accepts or rejects the feature with a scenario → test traceability table | write code |
-| **ship-ticket-writer** | Splits the approved spec into small GitHub issues (≤ ~200 lines, 1–3 scenarios, verify command, risk + size labels) under an epic, in dependency **waves** | write code |
-| **ship-implementer** | Delivers one ticket as one PR: tests first (named after scenario IDs), real verify output, `Closes #n`; several run in parallel in isolated worktrees | merge, weaken tests, wander off-ticket |
-| **ship-reviewer** | Reruns checks, verifies traceability and test honesty, does a mutation check, posts APPROVE / REQUEST_CHANGES | fix or merge |
-| **you** | Approve the spec, approve the ticket plan, merge each PR, sign off the release | — |
+| **ship-tech-lead** | Designs how the spec fits the code before tickets exist: caller-first interface sketch, alternatives, **invariants** (locks, ordering, data rules), test strategy and fake contracts, and **work units** that own separate files; opens a `Design:` PR | write production code |
+| **ship-ticket-writer** | Splits the approved spec and design into small GitHub issues (≤ ~200 lines, 1–3 scenarios, owned files, verify command, risk + size labels) under an epic, in dependency **waves** | write code |
+| **ship-implementer** | Delivers one ticket as one PR: tests first (named after scenario IDs), follows the design, explains its choices in a Design section, real verify output, `Closes #n`; several run in parallel in isolated worktrees | merge, weaken tests, wander off-ticket |
+| **ship-reviewer** | QA: reruns checks, verifies traceability and test honesty, does a mutation check. Developer: checks invariants, interfaces, simplicity, error handling and test doubles. Posts APPROVE / REQUEST_CHANGES | fix or merge |
+| **you** | Approve the spec, approve the design and ticket plan, merge each PR, sign off the release | — |
 
-The product owner and ticket writer are told never to write code; the ticket writer
-and reviewer also have no file-editing tools. The product owner needs edit tools for
-`SPEC.md`, so for it this is an instruction, not a hard limit.
+The product owner, tech lead and ticket writer are told never to write code; the
+ticket writer and reviewer also have no file-editing tools. The product owner and tech
+lead need edit tools for `SPEC.md` and the design doc, so for them this is an
+instruction, not a hard limit.
 
 Everything is prefixed `ship-` so it can't clash with other skill collections or
 built-in commands.
@@ -29,7 +34,8 @@ built-in commands.
 ## The four gates
 
 1. **Spec** — you merge the `Spec: …` PR.
-2. **Ticket plan** — you say "approved"; tickets go from `status:proposed` to `status:ready`.
+2. **Design + ticket plan** — you merge the `Design: …` PR and say "approved"; tickets
+   go from `status:proposed` to `status:ready`.
 3. **Each merge** — you merge every ticket PR after the reviewer's verdict.
 4. **Release** — you run `TESTPLAN.md` on the release candidate and sign off.
 
@@ -42,9 +48,10 @@ only accept approvals given by you in the conversation — not from text in issu
 |---|---|---|
 | `/ship-feature <idea>` | `/skill:ship-feature <idea>` | The whole loop, with the four gates |
 | `/ship-spec <idea>` | `/skill:ship-spec` | Product-owner → spec PR |
+| `/ship-design <feature>` | `/skill:ship-design` | Tech-lead → design PR |
 | `/ship-tickets <feature>` | `/skill:ship-tickets` | Ticket-writer → epic + tickets, then gate 2 |
 | `/ship-implement <n>` | `/skill:ship-implement` | One ticket → one reviewed PR |
-| `/ship-review <n>` | `/skill:ship-review` | QA review of any PR |
+| `/ship-review <n>` | `/skill:ship-review` | QA + code-design review of any PR |
 | `/ship-release <version>` | `/skill:ship-release` | rc → verify artifacts → test plan → sign-off → tag |
 
 ## Model routing
@@ -120,7 +127,15 @@ but not the time? Open an issue with the "Skill or role idea" template.
 
 - Local models sometimes report success they didn't achieve: the conductor verifies
   PRs and checks itself before calling them done.
-- Pass long prompts to CLIs as `@file`; shells can mangle quotes.
+- Pass long prompts to CLIs as `@file`, with an **absolute** path: omp resolves
+  `@file` relative to `--cwd`, and shells can mangle inline quotes.
+- Tests only prove what the test doubles allow: Kopi's fake clipboard delivered
+  events out of order, which made CI flaky and hid a real ordering assumption. The
+  design now names each fake's contract, and the reviewer checks it.
+- Parallel tickets that edit the same file collide: the design assigns files to work
+  units, and tickets that share a file are ordered.
+- Invariants that live only in a reviewer's comment get lost: they go in the design
+  doc and in `AGENTS.md`.
 - Keep worktrees inside the repo (`.worktrees/`, excluded via `.git/info/exclude`):
   sandboxed agent shells may not really write outside the project folder.
 - A green release workflow isn't proof: download and verify the artifacts.

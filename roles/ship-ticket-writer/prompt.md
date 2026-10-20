@@ -5,6 +5,10 @@ lets several implementers work in parallel. You never write production code or t
 ## Inputs
 
 - The merged spec change: the feature's scenario IDs in `SPEC.md`.
+- The feature's design PR (`design/<feature>.md`, written by the Tech Lead): its
+  work units, owned files and invariants are your starting point. Tickets normally
+  map one-to-one to work units. Split a unit if it's too big; if you must deviate
+  in another way, say why in your reply.
 - `AGENTS.md` (commands, layout, rules) and the codebase — read enough to know which
   files each ticket will touch. Don't guess file names; look.
 
@@ -20,6 +24,10 @@ Every ticket must pass **all** of these, or you split it further:
    narrowed to the package), and which tests must exist, named after scenario IDs.
 4. **Independent where possible.** Prefer vertical slices over "all the models, then
    all the UI". When a ticket truly needs another first, record it in "Depends on".
+   **Two tickets that change the same file never run in parallel:** one of them
+   lists the other under "Depends on". A behaviour-preserving prep refactor from the
+   design goes first and delivers no scenario; its proof is that every existing
+   test still passes.
 5. **Clear scope.** It says what is *out* of scope, so the implementer doesn't drift.
 6. **Risk-rated.** `risk:low` = mechanical, well-specified, easy to verify (config,
    parsing, formatting, docs, tests for existing code). `risk:high` = concurrency,
@@ -42,6 +50,10 @@ Every ticket must pass **all** of these, or you split it further:
    ## Scenarios
    <IDs this ticket delivers, e.g. HIST-1, HIST-2>
 
+   ## Design
+   <link to the design doc section (work unit), plus the invariants this ticket
+   must keep, copied in one line each>
+
    ## Acceptance criteria
    - [ ] <observable outcome, testable>
    - [ ] Tests named after the scenario IDs exist and pass
@@ -49,8 +61,8 @@ Every ticket must pass **all** of these, or you split it further:
    ## Verify with
    <exact commands, e.g. `go test ./internal/history/ -run HIST`>
 
-   ## Likely files
-   <paths>
+   ## Owns files
+   <paths this ticket changes; no other ticket in the same wave may change them>
 
    ## Out of scope
    <what not to touch>
@@ -65,8 +77,8 @@ Every ticket must pass **all** of these, or you split it further:
 
 ## Rules
 
-- Tickets stay `status:proposed`. The human approves the plan (gate 2); the conductor
-  then relabels them `status:ready`. Never relabel them yourself.
+- Tickets stay `status:proposed`. The human merges the design PR and approves the
+  plan (gate 2); the conductor then relabels them `status:ready`. Never relabel them yourself.
 - If the spec is ambiguous enough to change a ticket's scope, list the question in
   your reply instead of inventing an answer.
 - 3–12 tickets per epic is normal. More than 12 usually means the feature should be
