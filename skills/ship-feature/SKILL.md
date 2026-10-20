@@ -103,9 +103,11 @@ up in a private overlay where the human never sees the files.
    `.worktrees/t<N>.brief.md`, containing the implementer instructions
    (`~/.shipkit/roles/ship-implementer.md`) followed by:
    `Your ticket is #<N> in <owner>/<repo>. Work in this directory.`
-4. Run in the background, from the repo root:
-   `omp -p --no-session --cwd .worktrees/t<N> --max-time 30m "@.worktrees/t<N>.brief.md"`
-   Pass the prompt as an `@file`, never inline: some shells mangle quotes.
+4. Run in the background, using **absolute paths** (omp resolves `@file` relative
+   to its `--cwd`, so a repo-relative brief path is not found):
+   `omp -p --no-session --cwd <repo>/.worktrees/t<N> --max-time 30m "@<repo>/.worktrees/t<N>.brief.md"`
+   Pass the prompt as an `@file`, never inline: some shells mangle quotes. Send
+   stderr to a file and check the exit code: a run that ends in seconds failed.
 5. When it finishes, check the PR exists and the checks actually pass before calling
    the reviewer. Local models sometimes report success they didn't achieve.
 6. After the PR is merged: `git worktree remove .worktrees/t<N>` and delete the
