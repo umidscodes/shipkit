@@ -68,5 +68,16 @@ PREFIX="$TMP" sh "$ROOT/install.sh" --uninstall >/dev/null
 [ -f "$TMP/.claude/agents/$first_role.md" ] || err "uninstall removed a foreign agent"
 rm -rf "$TMP"
 
+# The installer ships the omp watchdog.
+TMP=$(mktemp -d)
+PREFIX="$TMP" sh "$ROOT/install.sh" >/dev/null
+for f in ship-watch.sh ship-watch.ps1; do
+	[ -s "$TMP/.shipkit/scripts/$f" ] || err "install: missing ~/.shipkit/scripts/$f"
+done
+rm -rf "$TMP"
+
+# The watchdog stops stalled, looping and overlong runs (takes ~20s).
+sh "$ROOT/scripts/test-watch.sh" || err "ship-watch tests failed"
+
 [ $fail = 0 ] && echo "shipkit check: OK"
 exit $fail

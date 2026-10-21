@@ -60,7 +60,10 @@ Tickets carry `risk:low` or `risk:high`.
 
 - **Claude Code as conductor:** `risk:high` → implementer subagent on the strongest
   model; `risk:low` → `omp` headless in its own git worktree (your local model), or a
-  faster Claude model if omp isn't installed.
+  faster Claude model if omp isn't installed. Headless omp runs under the
+  **watchdog** (`ship-watch`): if the worktree stops changing for 15 minutes
+  (rewriting the same content doesn't count) or the run passes 40 minutes, it's
+  stopped, logged, and the ticket goes to Claude instead.
 - **omp as conductor:** implementers are omp `task` minions on `@default`; planning
   roles use `@slow`. Map those roles to whatever models you have in
   `~/.omp/agent/config.yml` (`modelRoles`).
@@ -89,6 +92,7 @@ What goes where:
 | `~/.omp/agent/agents/*.md`, `~/.omp/agent/skills/*/` | omp agents and skills |
 | `~/.shipkit/roles/*.md` | plain role prompts (used to brief headless omp runs) |
 | `~/.shipkit/scripts/setup-labels.*` | creates the GitHub labels in a repo |
+| `~/.shipkit/scripts/ship-watch.*` | runs a headless agent and stops it when it stalls, loops or runs too long |
 
 Update: `git pull` and run the installer again. Remove: run it with `-Uninstall` /
 `--uninstall`.
@@ -124,6 +128,14 @@ but not the time? Open an issue with the "Skill or role idea" template.
 [MIT](LICENSE). Contributions are accepted under the same license.
 
 ## Lessons baked in (from shipping Kopi)
+
+- "Known local failure" is a bug report in disguise. A test that only failed on the
+  developer's PC was written off as noise for a whole feature; a check that couldn't
+  run there (`-race` without a C toolchain) was never run. Preflight now checks the
+  environment, and such gaps become `env` tickets.
+- A local model can loop for hours while the harness says "working": it rewrites the
+  same files or repeats the same tool calls. The watchdog judges progress by what
+  actually changes in the worktree, not by what the harness reports.
 
 - Local models sometimes report success they didn't achieve: the conductor verifies
   PRs and checks itself before calling them done.

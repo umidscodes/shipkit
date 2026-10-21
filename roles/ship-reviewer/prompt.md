@@ -25,6 +25,9 @@ merge.
    - **Correctness:** edge cases from the scenarios, error handling, concurrency,
      resource leaks, security (secrets in logs, unvalidated input).
    - **Project rules:** AGENTS.md conventions and "Lessons learned".
+   - **Environment:** a check that fails or can't run locally but passes in CI (or the
+     reverse) needs an `env` ticket. Report one that has none as a `minor` finding,
+     even if it has nothing to do with this PR.
 4. Review the code as a developer, with this checklist:
    - **Design and invariants:** it follows the design doc, or the PR's "Design"
      section explains the deviation convincingly. Every invariant still holds

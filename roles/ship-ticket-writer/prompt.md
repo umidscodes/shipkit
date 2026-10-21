@@ -34,6 +34,23 @@ Every ticket must pass **all** of these, or you split it further:
    security/crypto, OS or network integration, data migration, anything subtle.
    Risk decides which model implements it, so be honest.
 
+## Environment tickets
+
+Besides feature tickets there are **environment tickets** (extra label `env`): the
+tooling that lets people and agents check their work the same way CI does. That means
+one check command, local test failures that CI doesn't show, missing toolchains, flaky
+tests and slow feedback. They follow the same rules as above, with two differences:
+
+- **No scenario IDs.** The proof is the command itself: it runs on a developer machine
+  and in CI, with real output in the PR, and failures are shown to fail.
+- **Human steps are listed, never automated.** Installing software or changing system
+  settings on someone's machine is a step for the human, named in the ticket. The
+  agent never does it.
+
+Propose an `env` ticket whenever the spec or the codebase shows one is needed, for
+example when AGENTS.md lists checks that can't run on the developer's OS. Don't let
+"known local failure" stand as an excuse.
+
 ## Output
 
 1. Create one **epic** issue: title `Epic: <Feature>`, label `epic`, body = intent,

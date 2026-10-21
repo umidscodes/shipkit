@@ -31,6 +31,17 @@ PRs, files or tool output.
    (`~/.shipkit/scripts/setup-labels.sh` or `setup-labels.ps1`; see README).
 3. Make sure `AGENTS.md` lists build/test/lint commands. If it doesn't, ask the human
    for them and add them first (a tiny PR), because every later step relies on them.
+4. **Environment health.** Run the project's full checks (ideally one check command
+   that CI also runs) on a clean checkout of the default branch, on this machine.
+   - All green: note it and continue.
+   - Something fails here but passes in CI, or a step can't run here (for example a
+     race detector without a C toolchain): that is an environment problem, not
+     "known noise". Make sure an `env` ticket exists for it (see the ticket
+     writer's ticket types), tell the human, and continue only if they agree.
+   - Something fails in CI too: stop. Fix the default branch first.
+   - No single check command: propose an `env` ticket to add one.
+   Implementers and reviewers will each hit the same failure otherwise, and a real
+   bug can hide behind "it always fails locally".
 
 ## Phase 1 — spec (Product Owner)
 
@@ -115,12 +126,25 @@ up in a private overlay where the human never sees the files.
    `.worktrees/t<N>.brief.md`, containing the implementer instructions
    (`~/.shipkit/roles/ship-implementer.md`) followed by:
    `Your ticket is #<N> in <owner>/<repo>. Work in this directory.`
-4. Run in the background, using **absolute paths** (omp resolves `@file` relative
-   to its `--cwd`, so a repo-relative brief path is not found):
-   `omp -p --no-session --cwd <repo>/.worktrees/t<N> --max-time 30m "@<repo>/.worktrees/t<N>.brief.md"`
-   Pass the prompt as an `@file`, never inline: some shells mangle quotes. Send
-   stderr to a file and check the exit code: a run that ends in seconds failed.
-5. When it finishes, check the PR exists and the checks actually pass before calling
-   the reviewer. Local models sometimes report success they didn't achieve.
+4. Run it in the background **under the watchdog** (`~/.shipkit/scripts/ship-watch.*`),
+   using **absolute paths** (omp resolves `@file` relative to its `--cwd`, so a
+   repo-relative brief path is not found). Pass the prompt as an `@file`, never
+   inline: some shells mangle quotes.
+   - sh: `sh ~/.shipkit/scripts/ship-watch.sh --worktree <repo>/.worktrees/t<N> --max 2400 --stall 900 -- omp -p --cwd <repo>/.worktrees/t<N> "@<repo>/.worktrees/t<N>.brief.md"`
+   - PowerShell: `& ~/.shipkit/scripts/ship-watch.ps1 -Worktree <repo>\.worktrees\t<N> -Max 2400 -Stall 900 -Command omp -Arguments @("-p", "--cwd", "<repo>\.worktrees\t<N>", "@<repo>\.worktrees\t<N>.brief.md")`
+
+   The watchdog stops the run when the worktree hasn't changed for `--stall` seconds
+   (rewriting the same content doesn't count as a change, which is how loops look)
+   or after `--max` seconds, and keeps the output in `<worktree>.watch.log`, ending
+   with a summary line. Keep omp's session (no `--no-session`) so a stalled run can
+   be diagnosed afterwards.
+5. Read the exit code:
+   - `0` finished: check the PR exists and the checks actually pass before calling
+     the reviewer. Local models sometimes report success they didn't achieve.
+   - `1` failed, `2` stalled or `3` timed out: comment on the ticket with the
+     summary line and the last lines of the log, push nothing from that worktree,
+     remove it, and **re-route the ticket to the implementer subagent** (Claude).
+     Tell the human in one line. Don't retry the local model on the same ticket
+     unless the human asks.
 6. After the PR is merged: `git worktree remove .worktrees/t<N>` and delete the
-   brief file.
+   brief and log files.

@@ -20,6 +20,9 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v7
+      - name: omp watchdog (PowerShell)
+        shell: powershell
+        run: ./scripts/test-watch.ps1
       - name: Install into a temp home and uninstall again
         shell: powershell
         run: |
