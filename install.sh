@@ -76,8 +76,8 @@ for s in "$ROOT"/skills/*/; do
 	echo "skill  /$n"
 done
 
-cp "$ROOT"/scripts/setup-labels.* "$KIT/scripts/"
-chmod +x "$KIT/scripts/setup-labels.sh"
+cp "$ROOT"/scripts/setup-labels.* "$ROOT"/scripts/ship-watch.* "$KIT/scripts/"
+chmod +x "$KIT/scripts/setup-labels.sh" "$KIT/scripts/ship-watch.sh"
 
 echo
 [ "$skipped" -gt 0 ] && echo "Note: $skipped item(s) skipped to protect files shipkit didn't create."

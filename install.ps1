@@ -73,7 +73,7 @@ foreach ($s in $skills) {
     Write-Host "skill  /$($s.Name)"
 }
 
-foreach ($f in Get-ChildItem (Join-Path $root "scripts") -File -Filter "setup-labels.*") {
+foreach ($f in Get-ChildItem (Join-Path $root "scripts") -File | Where-Object { $_.Name -like "setup-labels.*" -or $_.Name -like "ship-watch.*" }) {
     Write-Text (Join-Path $kitHome "scripts\$($f.Name)") (Read-Text $f.FullName)
 }
 

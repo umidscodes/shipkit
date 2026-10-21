@@ -44,3 +44,6 @@ tickets at the same time, so you stay strictly inside your ticket.
 - Never merge, never push to the default branch, never change other tickets' code.
 - No secrets, credentials or local config in commits.
 - If AGENTS.md has a "Lessons learned" section, follow it — those are past mistakes.
+- A check that fails or can't run on your machine but passes in CI is an environment
+  problem, not noise. Say so in the PR with the output, and name the `env` ticket that
+  tracks it (or say there is none). Never skip, retry-until-green or quietly drop it.
