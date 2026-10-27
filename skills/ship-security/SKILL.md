@@ -20,7 +20,9 @@ fix become `security` tickets.
 ## `/ship-security sweep` — the whole repository
 
 Spawn the **ship-security-reviewer** agent in sweep mode on the default branch. Show
-the user its table. For critical or high findings in a public repo, the details are in
+the user its table. Each sweep adds a comment to the repo's `Security sweep log`
+issue: the commit, the scanners and the counts, never critical or high details. The
+next sweep compares against it. For critical or high findings in a public repo, the details are in
 a draft security advisory (only maintainers can see it) or only in the agent's report.
 Never paste them into a public issue, PR or commit message. Ask the human how to
 handle each one: a fix ticket written without exploit details, or a fix done privately
