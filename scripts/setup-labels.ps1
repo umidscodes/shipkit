@@ -7,6 +7,8 @@ $labels = @(
     @("spec", "0e8a16", "Spec change PR (merging = approval)"),
     @("design", "0052cc", "Design PR (approved with the ticket plan at gate 2)"),
     @("env", "006b75", "Development environment: tooling, checks, local setup"),
+    @("security", "b60205", "Security finding or hardening (from the security reviewer)"),
+    @("debloat", "fef2c0", "Removes code or agent context without changing behaviour"),
     @("status:proposed", "d4c5f9", "Ticket written, waiting for plan approval"),
     @("status:ready", "0e8a16", "Approved; can be picked up once dependencies close"),
     @("status:in-progress", "fbca04", "An implementer is working on it"),

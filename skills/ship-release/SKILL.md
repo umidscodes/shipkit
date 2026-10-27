@@ -13,6 +13,9 @@ process around them.
 1. **Readiness.** The default branch CI is green, and every epic going into this
    release is accepted by the product-owner. List what's included (merged PRs since
    the last tag: `git log <last-tag>..HEAD --merges`).
+   A security sweep (`/ship-security sweep`) must have run on a commit after the
+   last tag; if not, run one now. Open critical or high findings block the release
+   until they're fixed, or until the human explicitly accepts them for this version.
 2. **Test plan.** Update `TESTPLAN.md`: add cases for every new scenario ID (each
    with spec ID, preconditions, steps, expected), and keep the existing cases. Exact
    test data beats vague wording ("15 MiB + 1 byte", not "a large file"). Open this
