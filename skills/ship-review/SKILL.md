@@ -11,3 +11,6 @@ the mutation-check result, whether the PR follows the design, and the findings, 
 review comment it posted.
 
 The review is advice for the human, who decides whether to merge (gate 3).
+
+For a PR that touches the attack surface, also run `/ship-security <n>`. For a large
+PR (over about 150 changed lines), also run `/ship-debloat <n>`.

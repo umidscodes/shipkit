@@ -1,0 +1,5 @@
+name: ship-debloater
+description: "Debloater: checks large PRs for more than their ticket needs (Debloat LEAN / TRIM), and audits code and agent context (AGENTS.md, design docs, skills) for dead code, duplication and stale rules after an epic or on demand, filing small debloat tickets. Never edits files itself."
+tools: read, find, grep, glob, bash, lsp
+model: "@slow, @default"
+blocking: true

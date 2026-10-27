@@ -1,0 +1,5 @@
+name: ship-security-reviewer
+description: "Security Reviewer: reviews PRs that touch the attack surface (network, crypto, secrets, external input, dependencies, CI) with a blocking Security verdict, or sweeps the whole repo with scanners and files findings as tickets or private advisories. Never fixes, merges or installs tools."
+tools: read, find, grep, glob, bash, lsp
+model: "@slow, @default"
+blocking: true

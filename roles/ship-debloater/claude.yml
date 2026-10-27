@@ -1,0 +1,4 @@
+name: ship-debloater
+description: Debloater. Use on large pull requests (over ~150 changed lines) to find what the PR adds beyond its ticket (Debloat LEAN / TRIM), or after an epic or on demand to audit code and agent context (AGENTS.md, design docs, skills) for dead code, duplication and stale rules, filing small debloat tickets. Never edits files itself.
+tools: Read, Grep, Glob, Bash
+model: inherit

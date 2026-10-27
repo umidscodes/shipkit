@@ -89,14 +89,26 @@ Repeat until every ticket of the epic is merged:
      (isolated worktree per task). For `risk:high` tickets, tell the human they're
      better run from Claude Code, unless omp has a strong model configured for
      `@slow`.
-3. As each implementer reports a PR, spawn the **ship-reviewer** agent on it.
-   - `REQUEST_CHANGES` → send the findings to a fresh implementer for that ticket
-     (same branch). After 2 rounds without approval, stop and ask the human.
+3. As each implementer reports a PR, spawn the **ship-reviewer** agent on it. In
+   parallel, also spawn:
+   - the **ship-security-reviewer** (PR mode) if the PR is `risk:high` or `security`,
+     or touches the attack surface (the list is in `/ship-security`);
+   - the **ship-debloater** (PR mode) if the PR changes more than about 150 lines.
+
+   Then act on the verdicts together:
+   - Any `REQUEST_CHANGES` (including a Security one) or `TRIM` → send all findings
+     and cuts together to a fresh implementer for that ticket (same branch). After 2
+     rounds without approval, stop and ask the human.
+   - A critical or high security finding can only be waived by the human, in this
+     conversation. Record their decision on the PR.
+   - Medium or low security findings the PR doesn't fix → file them as `security`
+     tickets (via the ticket-writer) once the PR is merged.
    - Design findings count as much as test findings. If the reviewer finds the
      design itself is wrong (not just the PR), stop and bring it to the human: fix
      the design doc first, then the affected tickets.
-   - `APPROVE` → **Gate 3:** tell the human the PR is ready to merge, with the
-     reviewer's summary. Wait for them to merge. Then tick the ticket in the epic.
+   - Every verdict `APPROVE` (and `LEAN`) → **Gate 3:** tell the human the PR is
+     ready to merge, with each reviewer's summary. Wait for them to merge. Then tick
+     the ticket in the epic.
 4. A ticket labelled `status:blocked` → show its comment to the human and ask how to
    proceed (split, clarify, drop). Don't work around it.
 
@@ -107,6 +119,10 @@ Keep a short status table in chat after each wave: ticket, state, PR, verdict.
 When all tickets are merged, spawn the **ship-product-owner** to accept the feature. It
 posts a traceability table on the epic. If it says "not yet", create follow-up
 tickets for the gaps (through the ticket-writer) and go back to phase 4.
+
+Once the feature is accepted, spawn the **ship-debloater** in audit mode on what the
+epic added (`/ship-debloat audit`). Its tickets go into the next cycle and don't
+block the release.
 
 ## Phase 6 — release
 

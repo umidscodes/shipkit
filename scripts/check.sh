@@ -30,7 +30,7 @@ for s in "$ROOT"/skills/*/; do
 done
 
 # Every agent a skill mentions must exist.
-for a in $(grep -ohE '\*\*(ship-product-owner|ship-tech-lead|ship-ticket-writer|ship-implementer|ship-reviewer)\*\*' "$ROOT"/skills/*/SKILL.md | tr -d '*' | sort -u); do
+for a in $(grep -ohE '\*\*ship-[a-z-]+\*\*' "$ROOT"/skills/*/SKILL.md | tr -d '*' | sort -u); do
 	[ -d "$ROOT/roles/$a" ] || err "skills mention agent '$a' but roles/$a doesn't exist"
 done
 

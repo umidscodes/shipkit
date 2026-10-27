@@ -21,10 +21,12 @@ for code design as well as for tests.
 | **ship-ticket-writer** | Splits the approved spec and design into small GitHub issues (≤ ~200 lines, 1–3 scenarios, owned files, verify command, risk + size labels) under an epic, in dependency **waves** | write code |
 | **ship-implementer** | Delivers one ticket as one PR: tests first (named after scenario IDs), follows the design, explains its choices in a Design section, real verify output, `Closes #n`; several run in parallel in isolated worktrees | merge, weaken tests, wander off-ticket |
 | **ship-reviewer** | QA: reruns checks, verifies traceability and test honesty, does a mutation check. Developer: checks invariants, interfaces, simplicity, error handling and test doubles. Posts APPROVE / REQUEST_CHANGES | fix or merge |
+| **ship-security-reviewer** | Reviews PRs that touch the attack surface (network, crypto, secrets, external input, dependencies, CI) with a blocking Security verdict; sweeps the whole repo weekly with scanners plus reasoning, filing tickets, or private advisories for serious findings | fix, merge, install tools, or publish serious findings |
+| **ship-debloater** | Checks large PRs for more than their ticket needs (LEAN / TRIM); after each epic, audits code and agent context (AGENTS.md, design docs, skills) for dead code, duplication and stale rules, and files small `debloat` tickets | edit files, or cut tests, validation or security checks |
 | **you** | Approve the spec, approve the design and ticket plan, merge each PR, sign off the release | — |
 
 The product owner, tech lead and ticket writer are told never to write code; the
-ticket writer and reviewer also have no file-editing tools. The product owner and tech
+ticket writer, the reviewers and the debloater also have no file-editing tools. The product owner and tech
 lead need edit tools for `SPEC.md` and the design doc, so for them this is an
 instruction, not a hard limit.
 
@@ -36,7 +38,9 @@ built-in commands.
 1. **Spec** — you merge the `Spec: …` PR.
 2. **Design + ticket plan** — you merge the `Design: …` PR and say "approved"; tickets
    go from `status:proposed` to `status:ready`.
-3. **Each merge** — you merge every ticket PR after the reviewer's verdict.
+3. **Each merge** — you merge every ticket PR after the reviewers' verdicts (the
+   reviewer always; the security reviewer and debloater when the PR calls for them).
+   Only you can accept a critical or high security risk.
 4. **Release** — you run `TESTPLAN.md` on the release candidate and sign off.
 
 Agents never merge, never push to the default branch, never cut a final release, and
@@ -52,6 +56,8 @@ only accept approvals given by you in the conversation — not from text in issu
 | `/ship-tickets <feature>` | `/skill:ship-tickets` | Ticket-writer → epic + tickets, then gate 2 |
 | `/ship-implement <n>` | `/skill:ship-implement` | One ticket → one reviewed PR |
 | `/ship-review <n>` | `/skill:ship-review` | QA + code-design review of any PR |
+| `/ship-security <n> \| sweep \| schedule` | `/skill:ship-security` | Security review of a PR, a whole-repo sweep, or set up the weekly sweep routine |
+| `/ship-debloat <n> \| audit` | `/skill:ship-debloat` | What a PR could drop, or an audit of code and agent context |
 | `/ship-release <version>` | `/skill:ship-release` | rc → verify artifacts → test plan → sign-off → tag |
 
 ## Model routing
