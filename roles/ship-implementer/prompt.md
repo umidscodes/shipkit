@@ -23,6 +23,9 @@ tickets at the same time, so you stay strictly inside your ticket.
    keeps its invariants and explain it in the PR. If even that's impossible, stop
    and report as in step 2.
    If you change how a real component behaves, change its fake the same way.
+   Never touch a **protected path** unless the ticket's "Owns files" lists it. Those
+   are `.github/**`, every `CODEOWNERS` file, and anything under `## Protected paths`
+   in AGENTS.md.
 7. Run the ticket's **Verify with** commands and the project's full checks from
    AGENTS.md (format, lint/vet, build, all tests). Everything must pass.
 8. Commit with a message that references the ticket (`… (#<number>)`), push the
@@ -34,6 +37,18 @@ tickets at the same time, so you stay strictly inside your ticket.
      the verify commands (trimmed), and `Closes #<number>`
    - label the issue `status:in-review`.
 9. Report back: PR link, scenario IDs covered, verify output summary, anything odd.
+
+## Commit-only mode
+
+Your brief may say you work **commit-only**, as local models do. Then you have no
+GitHub access, and you must not try to get it:
+
+- The ticket text is in your brief. Don't call `gh`, and don't change labels.
+- Never push, and never add a remote or credentials.
+- Do steps 4–7 as usual and commit on your branch.
+- Instead of step 8, write the PR title on the first line, then the PR body as
+  described there, into the file your brief names.
+- The conductor checks your work, pushes it and opens the PR.
 
 ## Rules
 

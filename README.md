@@ -40,7 +40,14 @@ built-in commands.
    go from `status:proposed` to `status:ready`.
 3. **Each merge** — you merge every ticket PR after the reviewers' verdicts (the
    reviewer always; the security reviewer and debloater when the PR calls for them).
+   Every verdict names the commit it reviewed; a newer push needs a new review.
    Only you can accept a critical or high security risk.
+
+GitHub enforces the basics as well: preflight checks that the default branch requires
+a PR and named status checks, and blocks force-pushes and deletion. A gap becomes an
+`env` ticket. Changes to **protected paths** (`.github/**`, `CODEOWNERS`, and anything
+under `## Protected paths` in AGENTS.md) always get the security reviewer and are
+pointed out to you at the merge.
 4. **Release** — you run `TESTPLAN.md` on the release candidate and sign off.
 
 Agents never merge, never push to the default branch, never cut a final release, and
@@ -66,7 +73,9 @@ Tickets carry `risk:low` or `risk:high`.
 
 - **Claude Code as conductor:** `risk:high` → implementer subagent on the strongest
   model; `risk:low` → `omp` headless in its own git worktree (your local model), or a
-  faster Claude model if omp isn't installed. Headless omp runs under the
+  faster Claude model if omp isn't installed. The local model works **commit-only**,
+  with no GitHub credentials: the conductor checks its branch, then pushes it and
+  opens the PR. Headless omp runs under the
   **watchdog** (`ship-watch`): if the worktree stops changing for 15 minutes
   (rewriting the same content doesn't count) or the run passes 40 minutes, it's
   stopped, logged, and the ticket goes to Claude instead.
@@ -145,6 +154,14 @@ but not the time? Open an issue with the "Skill or role idea" template.
 
 - Local models sometimes report success they didn't achieve: the conductor verifies
   PRs and checks itself before calling them done.
+- A review covers one commit. A fix pushed after an approval was never reviewed,
+  so verdicts name the commit, and the merge step checks the head still matches.
+  This idea, and the next two, come from reviewing
+  [underground](https://github.com/IsrafilEMIN/underground-public).
+- Rules that only agents follow can be talked around. GitHub rulesets (PR required,
+  named checks, no force-push) hold even if an agent is confused or a token leaks.
+- An agent that can't push can't do damage on GitHub: local models commit, and the
+  conductor pushes after checking.
 - Pass long prompts to CLIs as `@file`, with an **absolute** path: omp resolves
   `@file` relative to `--cwd`, and shells can mangle inline quotes.
 - Tests only prove what the test doubles allow: Kopi's fake clipboard delivered

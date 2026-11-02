@@ -23,7 +23,7 @@ is narrow: **does this PR add more than its ticket needs?**
    - comments that repeat the code instead of explaining why.
 3. Post a PR comment (`gh pr comment <n> --body-file <file>`):
    ```
-   Debloat: LEAN | TRIM
+   Debloat: LEAN | TRIM at <full head sha>
 
    Cuts (biggest first):
    - path/file.go:40-75 — what to remove or merge, and why nothing breaks
