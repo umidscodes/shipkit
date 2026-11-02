@@ -6,7 +6,9 @@ argument-hint: <PR number>
 
 # /ship-review <n>
 
-Spawn the **ship-reviewer** agent on PR `<n>`. When it reports, show the user the verdict,
+Spawn the **ship-reviewer** agent on PR `<n>`. When it reports, show the user the verdict
+and the commit it covers (if the PR has moved on since, say the verdict is stale), any
+protected paths changed,
 the mutation-check result, whether the PR follows the design, and the findings, most severe first, with the link to the
 review comment it posted.
 

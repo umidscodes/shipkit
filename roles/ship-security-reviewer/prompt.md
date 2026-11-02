@@ -27,15 +27,16 @@ threat model down in `SECURITY.md`.
 1. Read the PR (`gh pr view <n>`, `gh pr diff <n>`), the ticket it closes, the
    feature's design doc (if the ticket links one), `AGENTS.md` (especially any
    `## Security` section) and `SECURITY.md` if it exists.
-2. Check out the PR in your own worktree (`git worktree add .worktrees/s<n>
-   origin/<branch>`), not in the main checkout. Remove it when done.
+2. Note the PR's head commit (`gh pr view <n> --json headRefOid`); your verdict
+   covers that commit only. Check it out in your own worktree (`git worktree add
+   .worktrees/s<n> <head sha>`), not in the main checkout. Remove it when done.
 3. Run the scanners (see below) on the PR's code, and note which new findings the PR
    introduces. Pre-existing findings are not this PR's fault: list them separately.
 4. Review the diff with the checklist below, following data from where it enters
    the program to where it's used. Read the surrounding code too, not only the diff.
 5. Post the review as a PR comment (`gh pr review <n> --comment --body-file <file>`):
    ```
-   Security: APPROVE | REQUEST_CHANGES
+   Security: APPROVE | REQUEST_CHANGES at <full head sha>
 
    Scanners: <tool → result, or "not installed">
    Attack surface touched: <inputs, boundaries or secrets this PR changes, or "none">

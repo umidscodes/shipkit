@@ -42,6 +42,32 @@ PRs, files or tool output.
    - No single check command: propose an `env` ticket to add one.
    Implementers and reviewers will each hit the same failure otherwise, and a real
    bug can hide behind "it always fails locally".
+5. **GitHub enforces the merge rules.** The gates above are rules for agents. GitHub
+   should enforce the basics too, so a confused agent or a leaked token can't get
+   around them.
+   - Read the default branch's rules: `gh api repos/<owner>/<repo>/rules/branches/<default branch>`
+     (rulesets), or `gh api repos/<owner>/<repo>/branches/<default branch>/protection`
+     (classic branch protection).
+   - Expect all four:
+     - changes must come through a pull request;
+     - required status checks, listed **by name** (the CI jobs from AGENTS.md);
+     - no force-push;
+     - no deletion.
+   - Anything missing: make sure an `env` ticket exists that lists the exact
+     settings. Changing repo settings is a human step, so tell the human and
+     continue only if they agree. "All checks that ran are green" is not a gate: a
+     skipped or not-yet-started workflow is not a failure.
+
+## Protected paths
+
+Some files can switch off the checks themselves:
+- `.github/**` (workflows can skip tests or leak secrets);
+- every `CODEOWNERS` file;
+- any path the project lists under `## Protected paths` in `AGENTS.md`.
+
+A PR that changes one of them always gets the security reviewer, and you say so
+first and plainly when you bring it to the human at gate 3. A ticket that needs to
+change one lists it under "Owns files" and is `risk:high`.
 
 ## Phase 1 — spec (Product Owner)
 
@@ -82,9 +108,9 @@ Repeat until every ticket of the epic is merged:
    - **Claude Code conductor**
      - `risk:high` → Agent tool, `subagent_type: ship-implementer`, `isolation: worktree`
        (Claude Code manages that worktree itself), strongest model.
-     - `risk:low` → if `omp` is installed, run it headless in a fresh worktree
-       (see "Running a ticket on omp" below); otherwise the implementer subagent
-       with a faster model.
+     - `risk:low` → if `omp` is installed, run it headless and **commit-only** in a
+       fresh worktree (see "Running a ticket on omp" below); otherwise the
+       implementer subagent with a faster model.
    - **omp conductor** → `task` tool with `agent: ship-implementer` for each ticket
      (isolated worktree per task). For `risk:high` tickets, tell the human they're
      better run from Claude Code, unless omp has a strong model configured for
@@ -106,9 +132,13 @@ Repeat until every ticket of the epic is merged:
    - Design findings count as much as test findings. If the reviewer finds the
      design itself is wrong (not just the PR), stop and bring it to the human: fix
      the design doc first, then the affected tickets.
-   - Every verdict `APPROVE` (and `LEAN`) → **Gate 3:** tell the human the PR is
-     ready to merge, with each reviewer's summary. Wait for them to merge. Then tick
-     the ticket in the epic.
+   - Every verdict `APPROVE` (and `LEAN`) → first check that each verdict names the
+     PR's **current** head (`gh pr view <n> --json headRefOid`). A verdict on an
+     older commit doesn't count: run that reviewer again on the new head. Then
+     **Gate 3:** tell the human the PR is ready to merge at that commit, with each
+     reviewer's summary and any protected paths it changes. Wait for them to merge,
+     check that the merged head is the reviewed commit, then tick the ticket in the
+     epic.
 4. A ticket labelled `status:blocked` → show its comment to the human and ask how to
    proceed (split, clarify, drop). Don't work around it.
 
@@ -139,9 +169,17 @@ up in a private overlay where the human never sees the files.
 2. `git fetch origin` then
    `git worktree add .worktrees/t<N> -b t<N>-<slug> origin/<default-branch>`
 3. Write a brief file **next to** the worktree, not in it, so it can't be committed:
-   `.worktrees/t<N>.brief.md`, containing the implementer instructions
-   (`~/.shipkit/roles/ship-implementer.md`) followed by:
-   `Your ticket is #<N> in <owner>/<repo>. Work in this directory.`
+   `.worktrees/t<N>.brief.md`. It contains:
+   - the implementer instructions (`~/.shipkit/roles/ship-implementer.md`);
+   - `You work commit-only. Your ticket is #<N> in <owner>/<repo>; its text is below.
+     Work in this directory. Write the PR title and body to <absolute path>/.worktrees/t<N>.pr.md.`;
+   - the ticket's title and body (`gh issue view <N>`).
+
+   **The local model gets no GitHub credentials.** Run it where none exist: ideally a
+   machine or OS user with no `gh` login and no GitHub SSH key (a model box, a
+   separate macOS user). At a minimum, unset `GH_TOKEN` and `GITHUB_TOKEN` for the
+   run. A confused or prompt-injected model then can't push, open PRs or touch other
+   repos: the conductor does all of that after checking its work.
 4. Run it in the background **under the watchdog** (`~/.shipkit/scripts/ship-watch.*`),
    using **absolute paths** (omp resolves `@file` relative to its `--cwd`, so a
    repo-relative brief path is not found). Pass the prompt as an `@file`, never
@@ -155,12 +193,23 @@ up in a private overlay where the human never sees the files.
    with a summary line. Keep omp's session (no `--no-session`) so a stalled run can
    be diagnosed afterwards.
 5. Read the exit code:
-   - `0` finished: check the PR exists and the checks actually pass before calling
-     the reviewer. Local models sometimes report success they didn't achieve.
+   - `0` finished:
+     1. Check that nothing reached GitHub on its own:
+        - `git ls-remote origin "refs/heads/t<N>-*"` is empty;
+        - no PR exists for the branch.
+
+        If something did, credentials leaked into the run: stop and tell the human.
+     2. Check that the branch has commits and that `t<N>.pr.md` exists.
+     3. Run the project's full checks yourself on that branch. Local models
+        sometimes report success they didn't achieve.
+     4. Then push the branch, open the PR from `t<N>.pr.md` (adding the
+        attribution line), label the ticket `status:in-review`, and call the
+        reviewer.
    - `1` failed, `2` stalled or `3` timed out: comment on the ticket with the
      summary line and the last lines of the log, push nothing from that worktree,
      remove it, and **re-route the ticket to the implementer subagent** (Claude).
      Tell the human in one line. Don't retry the local model on the same ticket
      unless the human asks.
 6. After the PR is merged: `git worktree remove .worktrees/t<N>` and delete the
-   brief and log files.
+   brief, PR and log files. A fix round works the same way: a new commit-only run
+   on the same branch, with the findings in the brief.

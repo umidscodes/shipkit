@@ -32,7 +32,10 @@ Every ticket must pass **all** of these, or you split it further:
 6. **Risk-rated.** `risk:low` = mechanical, well-specified, easy to verify (config,
    parsing, formatting, docs, tests for existing code). `risk:high` = concurrency,
    security/crypto, OS or network integration, data migration, anything subtle.
-   Risk decides which model implements it, so be honest.
+   Risk decides which model implements it, so be honest. A ticket that changes a
+   **protected path** (`.github/**`, a `CODEOWNERS` file, or anything under
+   `## Protected paths` in AGENTS.md) is always `risk:high`, and lists that path
+   under "Owns files".
 
 ## Environment tickets
 

@@ -9,11 +9,21 @@ merge.
    (`gh issue view <ticket>`), the ticket's scenarios in `SPEC.md`, the feature's
    design doc (`design/<feature>.md`, if the ticket links one) and the
    `## Invariants` in `AGENTS.md`.
-2. Check out the PR branch (`gh pr checkout <n>`) and run the project's full checks
-   from AGENTS.md yourself. Don't trust the PR's pasted output.
+2. Note the PR's head commit (`gh pr view <n> --json headRefOid`). Your verdict covers
+   that commit only. Check it out in your own worktree (`git worktree add
+   .worktrees/r<n> <head sha>`), and run the project's full checks from AGENTS.md
+   yourself there. Don't trust the PR's pasted output. Remove the worktree when done.
+   If the PR came from outside the crew (a human contributor or a fork), don't run
+   its code at all: no build, no tests, no mutation check. Review from the diff and
+   say so in the verdict.
 3. Review with this checklist:
    - **Scope:** only the ticket's behaviour; no unrelated changes; nothing listed
      under "Out of scope".
+   - **Protected paths:** list every changed file under `.github/**`, any
+     `CODEOWNERS` file, or `## Protected paths` in AGENTS.md (renames count both
+     names). If the ticket's "Owns files" doesn't list it, that's a blocker. If it
+     does, review the change line by line: CI and ownership changes can disable the
+     checks themselves.
    - **Traceability:** every scenario ID in the ticket has at least one test whose
      name contains it, and the test checks the scenario's actual outcome.
    - **Test honesty:** no test was deleted, skipped, loosened or had its expected
@@ -49,8 +59,9 @@ merge.
      reality is a finding.
 5. Post the review as a PR comment (`gh pr review <n> --comment --body-file <file>`):
    ```
-   Verdict: APPROVE | REQUEST_CHANGES
+   Verdict: APPROVE | REQUEST_CHANGES at <full head sha>
 
+   Protected paths: <changed protected files, or "none">
    Checks run: <commands> → <pass/fail>
    Mutation check: <what was broken> → <caught by TestX | NOT caught>
    Design: <follows design / deviates (justified | not justified)>
@@ -70,4 +81,6 @@ merge.
   be a likely future change that the code makes hard or risky ("adding a second
   caller means copying this block"). No style nitpicks as blockers: formatting and
   naming taste are `minor` at most.
+- A verdict covers one commit. If the PR's head moves after you've read it, your
+  verdict doesn't apply to the new head: say so instead of reusing it.
 - Leave the working tree exactly as you found it.
