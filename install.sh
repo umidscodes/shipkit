@@ -35,7 +35,8 @@ if [ "${1:-}" = "--uninstall" ]; then
 			[ -f "$d/.shipkit" ] && rm -rf "$d"
 		done
 	done
-	rm -rf "$KIT"
+	rm -rf "$KIT/roles" "$KIT/scripts"  # ~/.shipkit/loop holds the owner's settings: keep it
+	rmdir "$KIT" 2>/dev/null
 	echo "shipkit removed (only files it installed)."
 	exit 0
 fi
@@ -76,8 +77,8 @@ for s in "$ROOT"/skills/*/; do
 	echo "skill  /$n"
 done
 
-cp "$ROOT"/scripts/setup-labels.* "$ROOT"/scripts/ship-watch.* "$KIT/scripts/"
-chmod +x "$KIT/scripts/setup-labels.sh" "$KIT/scripts/ship-watch.sh"
+cp "$ROOT"/scripts/setup-labels.* "$ROOT"/scripts/ship-watch.* "$ROOT"/scripts/ship-loop.sh "$ROOT"/scripts/ship-gate.sh "$KIT/scripts/"
+chmod +x "$KIT/scripts/setup-labels.sh" "$KIT/scripts/ship-watch.sh" "$KIT/scripts/ship-loop.sh" "$KIT/scripts/ship-gate.sh"
 
 echo
 [ "$skipped" -gt 0 ] && echo "Note: $skipped item(s) skipped to protect files shipkit didn't create."
