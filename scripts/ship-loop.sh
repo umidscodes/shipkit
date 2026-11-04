@@ -111,7 +111,8 @@ repo_mode=$(gh api "repos/$REPO/contents/.shipkit/autonomy.yml" -H "Accept: appl
 	sed -n 's/^mode:[[:space:]]*//p' | head -1 | sed 's/[[:space:]]*#.*//; s/["'\'']//g; s/[[:space:]]*$//')
 mode=$MAX_MODE
 [ "$(rank "$repo_mode")" -lt "$(rank "$mode")" ] && mode=$repo_mode
-mode=$(case "$(rank "$mode")" in 2) echo auto ;; 1) echo dry-run ;; *) echo off ;; esac)
+# (not $(case ...): macOS's /bin/sh, bash 3.2, can't parse a case inside $( ))
+case "$(rank "$mode")" in 2) mode=auto ;; 1) mode=dry-run ;; *) mode=off ;; esac
 if [ "$mode" = off ]; then
 	say "off (local ceiling '$MAX_MODE', repo '${repo_mode:-none}')"
 	exit 0
