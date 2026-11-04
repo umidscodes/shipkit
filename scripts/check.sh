@@ -71,13 +71,16 @@ rm -rf "$TMP"
 # The installer ships the omp watchdog.
 TMP=$(mktemp -d)
 PREFIX="$TMP" sh "$ROOT/install.sh" >/dev/null
-for f in ship-watch.sh ship-watch.ps1; do
+for f in ship-watch.sh ship-watch.ps1 ship-loop.sh ship-gate.sh; do
 	[ -s "$TMP/.shipkit/scripts/$f" ] || err "install: missing ~/.shipkit/scripts/$f"
 done
 rm -rf "$TMP"
 
 # The watchdog stops stalled, looping and overlong runs (takes ~20s).
 sh "$ROOT/scripts/test-watch.sh" || err "ship-watch tests failed"
+
+# The autonomous loop's wrapper refuses unsafe starts, and its merge gate holds what it must.
+sh "$ROOT/scripts/test-loop.sh" || err "ship-loop / ship-gate tests failed"
 
 [ $fail = 0 ] && echo "shipkit check: OK"
 exit $fail

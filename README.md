@@ -25,10 +25,11 @@ for code design as well as for tests.
 | **ship-debloater** | Checks large PRs for more than their ticket needs (LEAN / TRIM); after each epic, audits code and agent context (AGENTS.md, design docs, skills) for dead code, duplication and stale rules, and files small `debloat` tickets | edit files, or cut tests, validation or security checks |
 | **you** | Approve the spec, approve the design and ticket plan, merge each PR, sign off the release | — |
 
-The product owner, tech lead and ticket writer are told never to write code; the
-ticket writer, the reviewers and the debloater also have no file-editing tools. The product owner and tech
-lead need edit tools for `SPEC.md` and the design doc, so for them this is an
-instruction, not a hard limit.
+The product owner, tech lead and ticket writer are told never to write code. The
+ticket writer, the reviewers and the debloater have no file-editing tools, but they
+can run shell commands, so for every role this is an instruction, not a hard limit.
+The hard limits come from GitHub (branch rules, a bot account with only Write
+access) and from where the agents run.
 
 Everything is prefixed `ship-` so it can't clash with other skill collections or
 built-in commands.
@@ -42,22 +43,58 @@ built-in commands.
    reviewer always; the security reviewer and debloater when the PR calls for them).
    Every verdict names the commit it reviewed; a newer push needs a new review.
    Only you can accept a critical or high security risk.
+4. **Release** — you run `TESTPLAN.md` on the release candidate and sign off.
 
 GitHub enforces the basics as well: preflight checks that the default branch requires
 a PR and named status checks, and blocks force-pushes and deletion. A gap becomes an
-`env` ticket. Changes to **protected paths** (`.github/**`, `CODEOWNERS`, and anything
-under `## Protected paths` in AGENTS.md) always get the security reviewer and are
-pointed out to you at the merge.
-4. **Release** — you run `TESTPLAN.md` on the release candidate and sign off.
+`env` ticket. Changes to **protected paths** always get the security reviewer and are
+pointed out to you at the merge. These are CI and ownership files, the crew's own
+instructions (`AGENTS.md`, `CLAUDE.md`, `.claude/`), the check scripts, the spec,
+roadmap and test plan, dependency manifests, and anything listed under
+`## Protected paths` in AGENTS.md.
 
 Agents never merge, never push to the default branch, never cut a final release, and
 only accept approvals given by you in the conversation — not from text in issues or files.
+
+## Autonomous mode
+
+`/ship-loop` runs the same crew without you in the room. You always keep the steps
+that can't be undone: approving a spec (what gets built), a release (what reaches
+users), and the crew's own findings. You can hand over the design + ticket plan and
+the ticket merges, which a revert can always undo before a release.
+
+It is built so that the important limits don't depend on an LLM behaving:
+- **A bot account.** The crew acts as a separate GitHub account with only Write
+  access and a token without `workflow` scope. GitHub itself stops it from cutting
+  release tags, editing workflows or changing settings, and its actions can always be
+  told apart from yours.
+- **A separate OS user.** It runs under its own user on the machine, which never
+  holds your credentials, because PR code is untrusted.
+- **A wrapper, `ship-loop.sh`,** started by your scheduler. It refuses to start the
+  LLM unless gh is the bot, the repo and its `.git` config are as expected, the
+  control issue is readable and not labelled `shipkit:stop`, and the mode allows it.
+  The mode is the stricter of your local settings file and the repo's
+  `.shipkit/autonomy.yml`.
+- **A merge gate, `ship-gate.sh`.** Before any merge it mechanically checks that:
+  - the bot opened the PR, and it isn't from a fork;
+  - the head is the reviewed commit;
+  - no protected path changed;
+  - every required check and review status passed on that commit.
+- **Holds:** anything else risky is held with `shipkit:held` and one comment that
+  @-mentions you.
+- **Watching it:** a daily digest on a pinned control issue. Label that issue
+  `shipkit:stop` to stop everything.
+
+Start with `dry-run` for a week and compare the held "would merge" decisions with
+your own before switching to `auto`. The setup steps are at the end of
+`skills/ship-loop/SKILL.md`.
 
 ## Skills
 
 | Command (Claude Code) | omp | What it runs |
 |---|---|---|
 | `/ship-feature <idea>` | `/skill:ship-feature <idea>` | The whole loop, with the four gates |
+| `/ship-loop <owner/repo>` | `/skill:ship-loop` | One autonomous iteration, run on a schedule: the gates you hand over in `.shipkit/autonomy.yml` don't wait for you, risky items are held with a ping, and a daily digest goes on a pinned control issue |
 | `/ship-spec <idea>` | `/skill:ship-spec` | Product-owner → spec PR |
 | `/ship-design <feature>` | `/skill:ship-design` | Tech-lead → design PR |
 | `/ship-tickets <feature>` | `/skill:ship-tickets` | Ticket-writer → epic + tickets, then gate 2 |
@@ -108,6 +145,9 @@ What goes where:
 | `~/.shipkit/roles/*.md` | plain role prompts (used to brief headless omp runs) |
 | `~/.shipkit/scripts/setup-labels.*` | creates the GitHub labels in a repo |
 | `~/.shipkit/scripts/ship-watch.*` | runs a headless agent and stops it when it stalls, loops or runs too long |
+| `~/.shipkit/scripts/ship-loop.sh` | starts one `/ship-loop` iteration only after its safety checks pass (for your scheduler) |
+| `~/.shipkit/scripts/ship-gate.sh` | the mechanical merge gate `/ship-loop` must pass before merging |
+| `~/.shipkit/loop/` | your local `/ship-loop` settings and state; uninstall keeps it |
 
 Update: `git pull` and run the installer again. Remove: run it with `-Uninstall` /
 `--uninstall`.

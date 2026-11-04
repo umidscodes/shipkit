@@ -42,7 +42,9 @@ if ($Uninstall) {
             if (Test-Path (Join-Path $d ".shipkit")) { Remove-Item -Recurse $d }
         }
     }
-    Remove-Item -Recurse $kitHome -ErrorAction SilentlyContinue
+    # ~/.shipkit/loop holds the owner's settings for /ship-loop: keep it
+    foreach ($d in "roles", "scripts") { Remove-Item -Recurse (Join-Path $kitHome $d) -ErrorAction SilentlyContinue }
+    if ((Test-Path $kitHome) -and -not (Get-ChildItem $kitHome -Force)) { Remove-Item $kitHome }
     Write-Host "shipkit removed (only files it installed)."
     exit 0
 }
@@ -73,7 +75,7 @@ foreach ($s in $skills) {
     Write-Host "skill  /$($s.Name)"
 }
 
-foreach ($f in Get-ChildItem (Join-Path $root "scripts") -File | Where-Object { $_.Name -like "setup-labels.*" -or $_.Name -like "ship-watch.*" }) {
+foreach ($f in Get-ChildItem (Join-Path $root "scripts") -File | Where-Object { $_.Name -like "setup-labels.*" -or $_.Name -like "ship-watch.*" -or $_.Name -in @("ship-loop.sh", "ship-gate.sh") }) {
     Write-Text (Join-Path $kitHome "scripts\$($f.Name)") (Read-Text $f.FullName)
 }
 
