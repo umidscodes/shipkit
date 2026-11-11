@@ -18,7 +18,7 @@ param(
     [string[]]$Arguments = @(),
     [string]$Log = "",
     [int]$Max = 2400,
-    [int]$Stall = 900,
+    [int]$Stall = 1500,
     [int]$Interval = 30
 )
 

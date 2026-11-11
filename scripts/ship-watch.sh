@@ -16,7 +16,7 @@ set -u
 
 usage() { echo "usage: ship-watch.sh --worktree DIR [--log FILE] [--max S] [--stall S] [--interval S] -- cmd..." >&2; exit 64; }
 
-WT="" LOG="" MAX=2400 STALL=900 INTERVAL=30
+WT="" LOG="" MAX=2400 STALL=1500 INTERVAL=30
 while [ $# -gt 0 ]; do
 	case "$1" in
 	--worktree) WT=$2; shift 2 ;;

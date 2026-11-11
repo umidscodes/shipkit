@@ -76,7 +76,7 @@ Tickets carry `risk:low` or `risk:high`.
   faster Claude model if omp isn't installed. The local model works **commit-only**,
   with no GitHub credentials: the conductor checks its branch, then pushes it and
   opens the PR. Headless omp runs under the
-  **watchdog** (`ship-watch`): if the worktree stops changing for 15 minutes
+  **watchdog** (`ship-watch`): if the worktree stops changing for 25 minutes
   (rewriting the same content doesn't count) or the run passes 40 minutes, it's
   stopped, logged, and the ticket goes to Claude instead.
 - **omp as conductor:** implementers are omp `task` minions on `@default`; planning
@@ -151,6 +151,10 @@ but not the time? Open an issue with the "Skill or role idea" template.
 - A local model can loop for hours while the harness says "working": it rewrites the
   same files or repeats the same tool calls. The watchdog judges progress by what
   actually changes in the worktree, not by what the harness reports.
+- The same watchdog can stop a model that is just thinking. In an overnight soak,
+  Qwen spent 15 minutes reading code and planning (about 5,000 thinking tokens a
+  turn) before its first edit, was stopped as stalled, and passed on the retry. The
+  stall limit is now 25 minutes.
 
 - Local models sometimes report success they didn't achieve: the conductor verifies
   PRs and checks itself before calling them done.

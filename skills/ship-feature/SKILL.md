@@ -184,8 +184,8 @@ up in a private overlay where the human never sees the files.
    using **absolute paths** (omp resolves `@file` relative to its `--cwd`, so a
    repo-relative brief path is not found). Pass the prompt as an `@file`, never
    inline: some shells mangle quotes.
-   - sh: `sh ~/.shipkit/scripts/ship-watch.sh --worktree <repo>/.worktrees/t<N> --max 2400 --stall 900 -- omp -p --cwd <repo>/.worktrees/t<N> "@<repo>/.worktrees/t<N>.brief.md"`
-   - PowerShell: `& ~/.shipkit/scripts/ship-watch.ps1 -Worktree <repo>\.worktrees\t<N> -Max 2400 -Stall 900 -Command omp -Arguments @("-p", "--cwd", "<repo>\.worktrees\t<N>", "@<repo>\.worktrees\t<N>.brief.md")`
+   - sh: `sh ~/.shipkit/scripts/ship-watch.sh --worktree <repo>/.worktrees/t<N> --max 2400 --stall 1500 -- omp -p --cwd <repo>/.worktrees/t<N> "@<repo>/.worktrees/t<N>.brief.md"`
+   - PowerShell: `& ~/.shipkit/scripts/ship-watch.ps1 -Worktree <repo>\.worktrees\t<N> -Max 2400 -Stall 1500 -Command omp -Arguments @("-p", "--cwd", "<repo>\.worktrees\t<N>", "@<repo>\.worktrees\t<N>.brief.md")`
 
    The watchdog stops the run when the worktree hasn't changed for `--stall` seconds
    (rewriting the same content doesn't count as a change, which is how loops look)
